@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp", "cubeforest3003"],
+      "env": {
+        "AZURE_DEVOPS_PAT": "${AZURE_DEVOPS_PAT}"
+      }
+    }
+  }
+}
