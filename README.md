@@ -1,0 +1,51 @@
+# claudeRoutineExercises
+claude Routine Exercises
+
+The document is for claude to read and do routine Azure DevOps work item management on schedule.
+
+## Work Items
+
+| Date | Type | Title | Description | Assigned To | Status | ID | Parent ID |
+|------|------|-------|-------------|-------------|--------|----|-----------|
+| 2026-06-09 | User Story | provide contry list of American | provide contry list of American | yuhuang.li.cloudalake@gmail.com | Closed | 97 | |
+| 2026-06-09 | Task | found the contry list of American | Canada ,United States of America ,Mexico ,Belize ,Costa Rica ,El Salvador ,Guatemala ,Honduras ,Nicaragua ,Panama ,Antigua and Barbuda ,Bahamas ,Barbados ,Cuba ,Dominica ,Dominican Republic ,Grenada ,Haiti ,Jamaica ,Saint Kitts and Nevis ,Saint Lucia ,Saint Vincent and the Grenadines ,Trinidad and Tobago ,Argentina ,Bolivia ,Brazil ,Chile ,Colombia ,Ecuador ,Guyana ,Paraguay ,Peru ,Suriname ,Uruguay ,Venezuela | yuhuang.li.cloudalake@gmail.com | Closed | 98 | 97 |
+| 2026-06-10 | User Story | make table of Contry with continent in PBIP project | make table of Contry with continent in PBIP project | yuhuang.li.cloudalake@gmail.com | Closed | 105 | |
+| 2026-06-10 | Task | make table "Contry" | make table "Contry" with data provided yesterday, for American at this moment. | yuhuang.li.cloudalake@gmail.com | Closed | 106 | 105 |
+| 2026-06-11 | User Story | Establish connectivity & locate the requirement | As the modeling team, we need authenticated access to the company Azure DevOps project and the Databricks QA warehouse, and the AM_Q4 work-item family located, so that the indicator's requirement is in hand before any modeling begins. | | pending | «story:day1» | |
+| 2026-06-11 | Task | Connect to the company Azure DevOps org via company-ado MCP and list projects | Confirm the correct server variant; pin Children with Special Needs as the target project; save to memory | yuhuang.li.cloudalake@gmail.com | pending | «task:day1-1» | «story:day1» |
+| 2026-06-11 | Task | Search and retrieve the AM_Q4 work-item family | Read AC + linked items; note #3247 is SME-APPROVED | cubeforest3003@gmail.com | pending | «task:day1-2» | «story:day1» |
+| 2026-06-11 | Task | Connect to Databricks QA (`csn-qa`) and smoke-test the gold catalog | `business_intelligence_and_practice_division_bipd_ppe.gold_ecd_bi_ppe` reachable; warehouse id resolved | yuhuang.li.cloudalake@gmail.com | pending | «task:day1-3» | «story:day1» |
+| 2026-06-11 | Task | Confirm the existing `service_recommendation_pbip` is the model to extend | Read existing tables; confirm `Date (Accessed)` relationship already present | cubeforest3003@gmail.com | pending | «task:day1-4» | «story:day1» |
+| 2026-06-11 | Bug | ADO calls return 401 / TF400813 (Unauthorized) | Re-auth via configuration, never paste a PAT into chat; refresh the org credential, then re-run `core_list_projects` | yuhuang.li.cloudalake@gmail.com | pending | «bug:day1-1» | «story:day1» |
+| 2026-06-11 | Bug | Wrong org variant — `ado-mdai` connected instead of the company org | Switch to the `company-ado` server; record the decision in memory so future sessions don't reconnect to `ado-mdai` | yuhuang.li.cloudalake@gmail.com | pending | «bug:day1-2» | «story:day1» |
+| 2026-06-12 | User Story | Capture the authoritative requirement & source logic | As the modeling team, we need the authoritative AM_Q4 definition and the real source ETL logic, plus a trustworthy validation target, so that we build against ground truth and not a prose paraphrase. | | pending | «story:day2» | |
+| 2026-06-12 | Task | Extract the AM_Q4 definition and reconcile | Definition: distinct children with IA-or-Intervention accessed in the PSL program during the reporting period | cubeforest3003@gmail.com | pending | «task:day2-1» | «story:day2» |
+| 2026-06-12 | Task | Download the authoritative ETL cursor `C_PSL_ANN_Q4` | Pull via ADO attachments API; treat the SQL as authoritative | yuhuang.li.cloudalake@gmail.com | pending | «task:day2-2» | «story:day2» |
+| 2026-06-12 | Task | Fix the validation target from the QA test document | `PSL AM Q4.xlsx`, tab 2022, Manitoulin Sudbury PSL System = 1365 | cubeforest3003@gmail.com | pending | «task:day2-3» | «story:day2» |
+| 2026-06-12 | Bug | False target 7,627 carried over from #19115 PPE/PROD comparison | Discard 7,627 entirely; adopt the agency-level test-doc values as ground truth | yuhuang.li.cloudalake@gmail.com | pending | «bug:day2-1» | «story:day2» |
+| 2026-06-13 | User Story | Reconstruct AM_Q4 on the Databricks gold model | As the modeling team, we need the Oracle source rules translated onto the gold Databricks schema as a raw SQL baseline, so we can iterate to the target number before touching the model. | | pending | «story:day3» | |
+| 2026-06-13 | Task | Map Oracle source columns → gold columns | `rsp_site`→`d_provider_org.GROUP_NAME`; `member_id`→`d_individual_client.CLIENT_ID` | yuhuang.li.cloudalake@gmail.com | pending | «task:day3-1» | «story:day3» |
+| 2026-06-13 | Task | Write & run the translated `C_PSL_ANN_Q4` against gold | Build incrementally; keep every run reproducible from a checked-in `.sql`/`.py` | cubeforest3003@gmail.com | pending | «task:day3-2» | «story:day3» |
+| 2026-06-13 | Task | Diagnose the gap with bracketing variants | Establish that 1365 sits *between* cumulative and within-year bounds | yuhuang.li.cloudalake@gmail.com | pending | «task:day3-3» | «story:day3» |
+| 2026-06-13 | Bug | `INITIAL_ASSESSMENT_IND` assumed `'Y'/'N'`; it is `'0'/'1'` | Use `INITIAL_ASSESSMENT_IND='1'`; derive accessed from `ACCESSED_DAY_NUM_KEY` | cubeforest3003@gmail.com | pending | «bug:day3-1» | «story:day3» |
+| 2026-06-13 | Bug | First translation overshoots ~1.4–2× and ratio varies by agency | Honestly record "not reconciled"; enumerate hypotheses for Day 4 | yuhuang.li.cloudalake@gmail.com | pending | «bug:day3-2» | «story:day3» |
+| 2026-06-14 | User Story | Reconcile against the live PSL Semantic Model | As the modeling team, we need our SQL to reproduce the existing live model's `AM_Q4_#_IA_Or_Intervention` value, so the new measure is provably faithful before we author it. | | pending | «story:day4» | |
+| 2026-06-14 | Task | Connect to the live model `PSL Semantic Model (Ministry)` | Reference value Manitoulin FY2022 = 1267 | cubeforest3003@gmail.com | pending | «task:day4-1» | «story:day4» |
+| 2026-06-14 | Task | Isolate the levers that close 1799 → 1267 | Two clicks: PSL scope, IA-flag = exclude Re-Assessment; birth-date band | yuhuang.li.cloudalake@gmail.com | pending | «task:day4-2» | «story:day4» |
+| 2026-06-14 | Task | Cross-check the reconciled SQL across 8 agencies vs the model | Exact on 5 agencies; ±small on Manitoulin/Grey Bruce/Kenora | cubeforest3003@gmail.com | pending | «task:day4-3» | «story:day4» |
+| 2026-06-14 | Bug | Residual drift on 3 agencies | Root cause = SCD2 client-key churn in gold vs the pre-filtered legacy mart | yuhuang.li.cloudalake@gmail.com | pending | «bug:day4-1» | «story:day4» |
+| 2026-06-15 | User Story | Implement the AM_Q4 measure in the PBIP semantic model | As a report author, I need an `AM_Q4 - # IA or Intervention` measure in `service_recommendation_pbip`, so the indicator is available to visuals. | | pending | «story:day5» | |
+| 2026-06-15 | Task | Decide logic placement | Fixed row-level rules pushed to fact partition SQL; distinct-count + period stays in DAX | yuhuang.li.cloudalake@gmail.com | pending | «task:day5-1» | «story:day5» |
+| 2026-06-15 | Task | Author the measure via `measure_operations` / TMDL | `DISTINCTCOUNT(D_INDIVIDUAL_CLIENT_KEY)`, PSL scope, flags... | cubeforest3003@gmail.com | pending | «task:day5-2» | «story:day5» |
+| 2026-06-15 | Task | Confirm role-playing `Date (Accessed)` / `Date (Finished)` relationships | Reuse existing active `Date (Accessed)` relationship; no new tables | yuhuang.li.cloudalake@gmail.com | pending | «task:day5-3» | «story:day5» |
+| 2026-06-15 | Bug | TMDL strictness — doc-comment placement / indentation rejected | Apply known TMDL rules: `///` must directly precede a declaration | cubeforest3003@gmail.com | pending | «bug:day5-1» | «story:day5» |
+| 2026-06-16 | User Story | Build the AM_Q4 report page (slicers + KPI) | As a report consumer, I need a dedicated AM_Q4 page with a fiscal-year slicer, a provider-org slicer, and a KPI card. | | pending | «story:day6» | |
+| 2026-06-16 | Task | Add a new report page "AM_Q4" | Hand-edit `report.json` following the existing page patterns | cubeforest3003@gmail.com | pending | «task:day6-1» | «story:day6» |
+| 2026-06-16 | Task | Add Fiscal Year slicer + Provider Org (`group_name`) slicer | Bind slicers to the corresponding model fields | yuhuang.li.cloudalake@gmail.com | pending | «task:day6-2» | «story:day6» |
+| 2026-06-16 | Task | Add a KPI card bound to `[AM_Q4 - # IA or Intervention]` | Card should show ~1267 for Manitoulin Sudbury + FY 2022/23 | cubeforest3003@gmail.com | pending | «task:day6-3» | «story:day6» |
+| 2026-06-16 | Bug | PBIR `report.json` field-role / visual binding pitfalls | Match the field-role conventions already in the file | yuhuang.li.cloudalake@gmail.com | pending | «bug:day6-1» | «story:day6» |
+| 2026-06-17 | User Story | End-to-end validation, documentation & retrospective | As the modeling team, we need the change verified in Power BI Desktop, documented, and retrospected. | | pending | «story:day7» | |
+| 2026-06-17 | Task | Open `service_recommendation_pbip` in Desktop and verify | Confirm ~1267 Manitoulin FY2022; confirm slicers filter the card | yuhuang.li.cloudalake@gmail.com | pending | «task:day7-1» | «story:day7» |
+| 2026-06-17 | Task | Reconcile live measure value against Day-4 SQL one final time | Carry forward the SCD2 residual note from Bug «bug:day4-1» | cubeforest3003@gmail.com | pending | «task:day7-2» | «story:day7» |
+| 2026-06-17 | Task | Update docs + memory + repo hygiene | Session summary doc; refresh `amq4-indicator-logic` memory | yuhuang.li.cloudalake@gmail.com | pending | «task:day7-3» | «story:day7» |
+| 2026-06-17 | Bug | Known discrepancy: live model 1267 vs test-doc 1365 | Document as a pre-existing model/data issue; escalate to SME | cubeforest3003@gmail.com | pending | «bug:day7-1» | «story:day7» |

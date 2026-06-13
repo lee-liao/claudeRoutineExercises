@@ -1,0 +1,52 @@
+name: Create Azure DevOps Work Items
+
+on:
+  workflow_dispatch:
+    inputs:
+      work_date:
+        description: 'Date (YYYY-MM-DD). Leave blank to use today (UTC).'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  create-work-items:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Wait for random time
+        run: node waitForRandomTime.js
+
+      - name: Resolve work date
+        id: date
+        run: |
+          DATE="${{ github.event.inputs.work_date }}"
+          if [ -z "$DATE" ]; then DATE=$(date -u +%Y-%m-%d); fi
+          echo "value=$DATE" >> "$GITHUB_OUTPUT"
+          echo "Work date: $DATE"
+
+      - name: Create work items and update README
+        env:
+          ADO_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+          WORK_DATE: ${{ steps.date.outputs.value }}
+        run: python3 scripts/manage_workitems.py
+
+      - name: Commit and push README
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add README.md
+          git diff --cached --quiet || git commit -m "Update work items for ${{ steps.date.outputs.value }}"
+          git push origin main
