@@ -205,7 +205,9 @@ Steps
 4. If no rows match, make no changes and stop.
 5. Otherwise create the matching items in ADO project powerBI-demo:
    - Run `node waitForRandomTime.js` (random wait before the first ADO call).
-   - Create the User Story first; capture its new numeric ID.
+   - Create the User Story first; capture its new numeric ID. If the Story's README
+     "Parent ID" is already a real numeric ID (e.g. 92, an existing epic), set the new
+     Story's parentId to it so the hierarchy link is created.
    - After creating the User Story, set its State to "Active".
    - For each child Task/Bug:
      - Run `node waitForRandomTime.js` (random wait before each child item).
