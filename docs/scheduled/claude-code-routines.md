@@ -59,6 +59,9 @@ In the web UI at https://claude.ai/code/routines → **New routine**:
 
 ## Prompt — Create daily work items
 
+> If the target ADO project changes, update the `Target ADO project` line in the Context
+> section of this prompt and keep it in sync with the Close prompt below.
+
 ```
 You are running as an autonomous scheduled routine; no human can answer questions.
 Make reasonable decisions and complete the task end to end.
@@ -92,6 +95,9 @@ Steps
 ```
 
 ## Prompt — Close daily work items
+
+> If the target ADO project changes, update the `Target ADO project` line here to match
+> the Create prompt above.
 
 ```
 You are running as an autonomous scheduled routine; no human can answer questions.
