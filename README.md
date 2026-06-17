@@ -7,5 +7,5 @@ The document is for claude to read and do routine Azure DevOps work item managem
 
 | Date | Type | Title | Description | Assigned To | Status | ID | Parent ID |
 |------|------|-------|-------------|-------------|--------|----|-----------|
-| 2026-06-17 | User Story | End-to-end validation, documentation & retrospective | As the modeling team, we need the change verified in Power BI Desktop, documented, and retrospected. | cubeforest3003@gmail.com | Closed | 176 | 92 |
-| 2026-06-17 | Task | Update docs + memory + repo hygiene | Session summary doc; refresh `amq4-indicator-logic` memory | yuhuang.li.cloudalake@gmail.com | Closed | 177 | 176 |
+| 2026-06-18 | User Story | Routines setup on Claud Code Web | Routines setup on Claud Code Web with documents | cubeforest3003@gmail.com | pending | «story:day7» | 92 |
+| 2026-06-18 | Task | Routines ADO - create work items | Routines ADO - create work items | yuhuang.li.cloudalake@gmail.com | pending | «task:day7-1» | «story:day7» |
