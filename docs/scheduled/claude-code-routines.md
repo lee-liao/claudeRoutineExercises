@@ -179,20 +179,31 @@ Context
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the "main" branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
-Note for Git commands — perform exactly, do NOT create or use any claude/-prefixed branch:
-1. git checkout main
-2. git pull origin main
-3. (make the README.md edits)
-4. git add README.md && git commit -m "Create ADO work items for <DATE>"
-5. git push origin main
-You have unrestricted push permission for this repo; push directly to main.
+Git note — read before the Steps:
+The session starts checked out on an auto-created `claude/<random>` branch. That is expected
+and you cannot prevent it; do not delete it or push it. Move to `main` BEFORE reading or
+editing any file, so every change is made on `main` and no `git stash` is ever needed. The
+exact sequence that works:
+
+  # FIRST, before Step 1 below — switch to main and sync it:
+  git checkout main && git pull origin main
+
+  # ... then do all the task work (read README.md, ADO calls, edit README.md) on main ...
+
+  # FINALLY, after editing:
+  git add README.md && git commit -m "Create ADO work items for <DATE>"
+  git push origin main
+
+You have unrestricted push permission for this repo; push directly to `main`.
 
 Steps
-1. Determine today's date in UTC as YYYY-MM-DD.
-2. Read README.md. Find every row in the Work Items table whose Date == today AND whose
+1. Switch to main and sync it: run `git checkout main && git pull origin main` before doing
+   anything else, so all work below happens on `main`.
+2. Determine today's date in UTC as YYYY-MM-DD.
+3. Read README.md. Find every row in the Work Items table whose Date == today AND whose
    Status is "pending" (its ID cell is a placeholder token like «story:dayN»).
-3. If no rows match, make no changes and stop.
-4. Otherwise create the matching items in ADO project powerBI-demo:
+4. If no rows match, make no changes and stop.
+5. Otherwise create the matching items in ADO project powerBI-demo:
    - Run `node waitForRandomTime.js` (random wait before the first ADO call).
    - Create the User Story first; capture its new numeric ID.
    - After creating the User Story, set its State to "Active".
@@ -202,11 +213,11 @@ Steps
        parent using the README "Parent ID" token (e.g. «story:day5»).
      - Set Title, Description, and Assigned To from each README row.
      - Set its State to "Active".
-5. Edit README.md: replace every placeholder ID token for today's rows with the real
+6. Edit README.md: replace every placeholder ID token for today's rows with the real
    numeric ID, set Status to "Active", and replace child "Parent ID" tokens with the
    parent's real numeric ID.
-6. Commit README.md and push to main with message: "Create ADO work items for <DATE>".
-7. Verify each created item's State is Active before finishing. Never print the PAT.
+7. Commit README.md and push to main with message: "Create ADO work items for <DATE>".
+8. Verify each created item's State is Active before finishing. Never print the PAT.
 ```
 
 ## Prompt — Close daily work items
@@ -224,26 +235,37 @@ Context
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the "main" branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
-Note for Git commands — perform exactly, do NOT create or use any claude/-prefixed branch:
-1. git checkout main
-2. git pull origin main
-3. (make the README.md edits)
-4. git add README.md && git commit -m "Close ADO work items for <DATE>"
-5. git push origin main
-You have unrestricted push permission for this repo; push directly to main.
+Git note — read before the Steps:
+The session starts checked out on an auto-created `claude/<random>` branch. That is expected
+and you cannot prevent it; do not delete it or push it. Move to `main` BEFORE reading or
+editing any file, so every change is made on `main` and no `git stash` is ever needed. The
+exact sequence that works:
+
+  # FIRST, before Step 1 below — switch to main and sync it:
+  git checkout main && git pull origin main
+
+  # ... then do all the task work (read README.md, ADO calls, edit README.md) on main ...
+
+  # FINALLY, after editing:
+  git add README.md && git commit -m "Close ADO work items for <DATE>"
+  git push origin main
+
+You have unrestricted push permission for this repo; push directly to `main`.
 
 Steps
-1. Determine today's date in UTC as YYYY-MM-DD.
-2. Read README.md. Find every row whose Date == today that has a real numeric ADO ID and
+1. Switch to main and sync it: run `git checkout main && git pull origin main` before doing
+   anything else, so all work below happens on `main`.
+2. Determine today's date in UTC as YYYY-MM-DD.
+3. Read README.md. Find every row whose Date == today that has a real numeric ADO ID and
    whose Status is "Active".
-3. If no rows match, make no changes and stop.
-4. Run `node waitForRandomTime.js` (random wait before the first ADO call).
-5. For each matching work item, set its State to "Closed" in ADO project powerBI-demo
+4. If no rows match, make no changes and stop.
+5. Run `node waitForRandomTime.js` (random wait before the first ADO call).
+6. For each matching work item, set its State to "Closed" in ADO project powerBI-demo
    (close child Tasks/Bugs first, then the parent User Story).
    - Run `node waitForRandomTime.js` between each item.
-6. Edit README.md: set Status to "Closed" for each affected row.
-7. Commit README.md and push to main with message: "Close ADO work items for <DATE>".
-8. Never print the PAT.
+7. Edit README.md: set Status to "Closed" for each affected row.
+8. Commit README.md and push to main with message: "Close ADO work items for <DATE>".
+9. Never print the PAT.
 ```
 
 ---
