@@ -95,12 +95,67 @@ Checking out `main` *first* is deliberate: it keeps all edits on `main` and avoi
 conflict** on `README.md` (the same file changed on both sides), which would silently break
 an unattended run. Edit on `main` directly and there is no stash and no conflict risk.
 
+### Recovery: you already edited files while on a `claude/` branch
+
+In an **interactive** session (or any time you notice the edits landed on the `claude/`
+branch *after the fact*), you can't "checkout main first" anymore — the change already
+exists in the working tree on the wrong branch. Use `git stash` to carry it across:
+
+```
+git stash                       # set the uncommitted edits aside
+git checkout main
+git pull origin main            # fast-forward main to the latest remote
+git stash pop                   # re-apply the edits on top of main
+git add <file> && git commit -m "<message>"
+git push origin main
+```
+
+`git stash pop` re-applies the change as a 3-way merge. It is **safe only when the file's
+base content is the same** on the `claude/` branch and on `main`. Verify first with:
+
+```
+git diff HEAD origin/main -- <file>     # empty output = same base, pop will be clean
+```
+
+If that diff is **non-empty**, the file diverged on `main`; a `pop` may conflict. In that
+case resolve the conflict markers by hand (or `git checkout --theirs/--ours` on the file),
+then `git add` and commit. This is exactly why the routine *prompts* check out `main`
+**before** editing — scheduled runs never enter this recovery path.
+
 **Prerequisite:** the **"Allow unrestricted git push"** permission must be ON (see
 *Branch-push permission* above), otherwise step 5 is blocked by the proxy.
 
 **Behavior tab:** leave **"Auto-fix pull requests" OFF**. It only watches/keeps green the
 PRs a routine *opens* and never creates or merges PRs — irrelevant to this direct-to-`main`
 workflow.
+
+### Cleaning up leftover `claude/` branches
+
+Because each run starts on a `claude/<random>` branch, those branches can pile up on the
+remote if anything ever pushes them. With the **push-directly-to-`main`** flow above they
+normally don't: the agent commits on `main` and only ever pushes `main`, so the throwaway
+`claude/` branch stays local and is discarded when the session's sandbox is reclaimed. (The
+web harness also cleans up its own branches — after the runs in this repo, `git ls-remote
+--heads origin` showed only `main` and the long-lived `feature/...` branch.)
+
+If a `claude/` branch *does* end up on GitHub, delete it from the remote with:
+
+```
+git push origin --delete claude/<name>     # delete the remote branch
+```
+
+To inspect and prune in bulk:
+
+```
+git ls-remote --heads origin                       # list every remote branch
+git fetch --prune                                  # drop local refs for branches gone on the remote
+git branch -r --merged origin/main | grep claude/  # remote claude/ branches already merged into main
+```
+
+You can also delete a branch from the GitHub web UI (repo → **Branches** → trash icon).
+Deleting a `claude/` branch is safe once its work is on `main`; if unsure, confirm the
+commits are reachable from `main` first (`git branch -r --contains <sha>` should list
+`origin/main`).
 
 > If your org later forbids direct pushes to `main` (e.g. branch protection), this
 > direct-push design will start failing. You'd then switch to a PR flow: have the prompt
