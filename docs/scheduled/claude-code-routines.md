@@ -17,6 +17,28 @@ Docs: https://code.claude.com/docs/en/routines
 2. **MCP** — the `azure-devops` server is declared in `.mcp.json`; routines pick it up
    from the repo. No account-level connector needed.
 
+## Permissions
+
+Tool calls that are not auto-allowed will block an unattended run. The committed
+`.claude/settings.json` pre-approves every operation the routines need:
+
+| Entry | Purpose |
+|-------|---------|
+| `mcp__azure-devops__create_work_item` | Create User Story / Task in ADO |
+| `mcp__azure-devops__update_work_item` | Set State to Active / Closed |
+| `Bash(git add *)` | Stage README.md changes |
+| `Bash(git commit *)` | Commit with date message |
+| `Bash(git push *)` | Push to remote branch |
+| `Bash(node waitForRandomTime.js)` | Run the random-wait script |
+
+No changes needed here; the file is committed and picked up automatically on clone.
+
+## Random wait
+
+`waitForRandomTime.js` (repo root) sleeps a random **0–1 min + 0–59 sec** before
+returning. The routines call it before the first ADO operation and between consecutive
+operations to avoid triggering rate-limit or bot-detection heuristics.
+
 ## Create the routine
 
 In the web UI at https://claude.ai/code/routines → **New routine**:
@@ -37,13 +59,16 @@ In the web UI at https://claude.ai/code/routines → **New routine**:
 
 ## Prompt — Create daily work items
 
+> If the target ADO project changes, update the `Target ADO project` line in the Context
+> section of this prompt and keep it in sync with the Close prompt below.
+
 ```
 You are running as an autonomous scheduled routine; no human can answer questions.
 Make reasonable decisions and complete the task end to end.
 
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
-- Target ADO project: powerBI-demo            <-- change here if the target project changes
+- Target ADO project: powerBI-demo
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
@@ -52,12 +77,16 @@ Steps
 2. Read README.md. Find every row in the Work Items table whose Date == today AND whose
    Status is "pending" (its ID cell is a placeholder token like «story:dayN»).
 3. If no rows match, make no changes and stop.
-4. Otherwise create the matching items in ADO project pbipExercise1:
+4. Otherwise create the matching items in ADO project powerBI-demo:
+   - Run `node waitForRandomTime.js` (random wait before the first ADO call).
    - Create the User Story first; capture its new numeric ID.
-   - Create each child Task/Bug with parentId = the story's new ID in project powerBI-demo. Map children to their
-     parent using the README "Parent ID" token (e.g. «story:day5»).
-   - Set Title, Description, and Assigned To from each README row.
-   - After creating each item, set its State to "Active".
+   - After creating the User Story, set its State to "Active".
+   - For each child Task/Bug:
+     - Run `node waitForRandomTime.js` (random wait before each child item).
+     - Create the child with parentId = the story's new numeric ID. Map children to their
+       parent using the README "Parent ID" token (e.g. «story:day5»).
+     - Set Title, Description, and Assigned To from each README row.
+     - Set its State to "Active".
 5. Edit README.md: replace every placeholder ID token for today's rows with the real
    numeric ID, set Status to "Active", and replace child "Parent ID" tokens with the
    parent's real numeric ID.
@@ -67,13 +96,16 @@ Steps
 
 ## Prompt — Close daily work items
 
+> If the target ADO project changes, update the `Target ADO project` line here to match
+> the Create prompt above.
+
 ```
 You are running as an autonomous scheduled routine; no human can answer questions.
 Make reasonable decisions and complete the task end to end.
 
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
-- Target ADO project: powerBI-demo            <-- keep in sync with the Create routine
+- Target ADO project: powerBI-demo
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
@@ -82,9 +114,11 @@ Steps
 2. Read README.md. Find every row whose Date == today that has a real numeric ADO ID and
    whose Status is "Active".
 3. If no rows match, make no changes and stop.
-4. For each matching work item, set its State to "Closed" in ADO project powerBI-demo
-   (close child Tasks/Bugs as well as the parent User Story).
-5. Edit README.md: set Status to "Closed" for each affected row.
-6. Commit README.md and push to main with message: "Close ADO work items for <DATE>".
-7. Never print the PAT.
+4. Run `node waitForRandomTime.js` (random wait before the first ADO call).
+5. For each matching work item, set its State to "Closed" in ADO project powerBI-demo
+   (close child Tasks/Bugs first, then the parent User Story).
+   - Run `node waitForRandomTime.js` between each item.
+6. Edit README.md: set Status to "Closed" for each affected row.
+7. Commit README.md and push to main with message: "Close ADO work items for <DATE>".
+8. Never print the PAT.
 ```
