@@ -33,6 +33,20 @@ Tool calls that are not auto-allowed will block an unattended run. The committed
 
 No changes needed here; the file is committed and picked up automatically on clone.
 
+### Branch-push permission (web UI — required for push to `main`)
+
+`.claude/settings.json` only governs *tool* approvals. Whether a routine may push to
+`main` is a **separate, account-side setting** in the routine's edit form:
+
+1. Open the routine at https://claude.ai/code/routines → pencil icon → **Edit routine**.
+2. Go to the **Permissions** tab.
+3. Enable **"Allow unrestricted git push"** for `lee-liao/claudeRoutineExercises`.
+
+Without this toggle the proxy blocks any push to a non-`claude/` branch, so the push to
+`main` fails. With it on, direct pushes to `main` are allowed. This is the "explicit
+permission" the injected branch directive refers to — see *Git workflow & branch behavior*
+below. (Changes apply from the **next** run.)
+
 ## Random wait
 
 `waitForRandomTime.js` (repo root) sleeps a random **0–1 min + 0–59 sec** before
@@ -49,11 +63,49 @@ In the web UI at https://claude.ai/code/routines → **New routine**:
    entered local and converted to UTC automatically).
 5. Create. Repeat for the **Close** prompt on a later daily time (e.g. 18:00).
 
-> Branch note: routines clone the default branch (`main`) and, by default, push changes
-> to a `claude/`-prefixed branch. Both prompts below explicitly commit the README update
-> to **`main`** so the evening Close run can find the morning's IDs. If your org forbids
-> direct pushes to `main`, change both prompts to push to a shared fixed branch and point
-> the GitHub default / Close routine at that same branch.
+## Git workflow & branch behavior
+
+This was the trickiest part to get right; the details below come from real failing and
+succeeding runs.
+
+**What the harness does by default.** Every routine run starts checked out on a fresh
+auto-generated `claude/<random>` branch, and the harness injects a directive telling the
+agent to develop there and *not* push elsewhere "without explicit permission". This happens
+**regardless of the "Allow unrestricted git push" toggle** — the toggle only removes the
+proxy block on pushing to `main`; it does not change which branch is checked out at start.
+
+**Why a naïve prompt fails.** If the prompt just says "push to main", the agent commits on
+the `claude/` branch (because that's what's checked out) and then `git push origin main`
+pushes the stale local `main` ref — which doesn't even contain the commit — and is rejected
+as a non-fast-forward. The README change ends up stranded on the `claude/` branch.
+
+**The fix (used in both prompts below).** Switch to `main` and sync it **before editing
+anything**, then commit and push on `main`:
+
+```
+1. git checkout main
+2. git pull origin main
+3. (make the README.md edits)
+4. git add README.md && git commit -m "<message>"
+5. git push origin main
+```
+
+Checking out `main` *first* is deliberate: it keeps all edits on `main` and avoids a
+`git stash` / `git stash pop` dance. Popping a stash after pulling can hit a **merge
+conflict** on `README.md` (the same file changed on both sides), which would silently break
+an unattended run. Edit on `main` directly and there is no stash and no conflict risk.
+
+**Prerequisite:** the **"Allow unrestricted git push"** permission must be ON (see
+*Branch-push permission* above), otherwise step 5 is blocked by the proxy.
+
+**Behavior tab:** leave **"Auto-fix pull requests" OFF**. It only watches/keeps green the
+PRs a routine *opens* and never creates or merges PRs — irrelevant to this direct-to-`main`
+workflow.
+
+> If your org later forbids direct pushes to `main` (e.g. branch protection), this
+> direct-push design will start failing. You'd then switch to a PR flow: have the prompt
+> open a PR from the `claude/` branch and merge it via GitHub auto-merge or an explicit
+> merge step. That adds a CI/review gate at the cost of more moving parts.
 
 ---
 
@@ -69,8 +121,16 @@ Make reasonable decisions and complete the task end to end.
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
 - Target ADO project: powerBI-demo
-- GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
+- GitHub repo: lee-liao/claudeRoutineExercises; work on the "main" branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
+
+Note for Git commands — perform exactly, do NOT create or use any claude/-prefixed branch:
+1. git checkout main
+2. git pull origin main
+3. (make the README.md edits)
+4. git add README.md && git commit -m "Create ADO work items for <DATE>"
+5. git push origin main
+You have unrestricted push permission for this repo; push directly to main.
 
 Steps
 1. Determine today's date in UTC as YYYY-MM-DD.
@@ -106,8 +166,16 @@ Make reasonable decisions and complete the task end to end.
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
 - Target ADO project: powerBI-demo
-- GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
+- GitHub repo: lee-liao/claudeRoutineExercises; work on the "main" branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
+
+Note for Git commands — perform exactly, do NOT create or use any claude/-prefixed branch:
+1. git checkout main
+2. git pull origin main
+3. (make the README.md edits)
+4. git add README.md && git commit -m "Close ADO work items for <DATE>"
+5. git push origin main
+You have unrestricted push permission for this repo; push directly to main.
 
 Steps
 1. Determine today's date in UTC as YYYY-MM-DD.
@@ -122,3 +190,19 @@ Steps
 7. Commit README.md and push to main with message: "Close ADO work items for <DATE>".
 8. Never print the PAT.
 ```
+
+---
+
+## Troubleshooting (lessons from real runs)
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `! [rejected] main -> main (non-fast-forward)` and the commit shows a `claude/...` branch tag | Agent committed on the auto-checked-out `claude/` branch, then pushed the stale local `main` ref (which lacks the commit) | Put `git checkout main && git pull origin main` **first**, before any edit; commit and push on `main` |
+| Push to `main` blocked / agent insists it may only use a `claude/` branch | **"Allow unrestricted git push"** is OFF in the routine's **Permissions** tab | Turn it ON; it applies from the next run |
+| README change "succeeds" but isn't on `main` | Change was committed/stranded on the `claude/` branch | Same as row 1 — check out `main` before editing |
+| `git stash pop` reports a conflict mid-run | Stash dance: README edited before switching branches, then `pull` changed README too | Avoid the stash entirely by checking out `main` first |
+
+**Verifying a run actually worked:** a green status only means the session exited without an
+infrastructure error — *not* that the task succeeded. Confirm with the remote, e.g.
+`git fetch origin main` then check `git show origin/main:README.md` shows the expected
+`Closed`/`Active` states, and that the latest `origin/main` commit is the routine's.
