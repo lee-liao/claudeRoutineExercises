@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__azure-devops__create_work_item",
+      "mcp__azure-devops__update_work_item",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ]
+  }
+}
