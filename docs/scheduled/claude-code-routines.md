@@ -65,7 +65,7 @@ Make reasonable decisions and complete the task end to end.
 
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
-- Target ADO project: powerBI-demo            <-- change here if the target project changes
+- Target ADO project: powerBI-demo
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
@@ -99,7 +99,7 @@ Make reasonable decisions and complete the task end to end.
 
 Context
 - Azure DevOps org: https://dev.azure.com/cubeforest3003
-- Target ADO project: powerBI-demo            <-- keep in sync with the Create routine
+- Target ADO project: powerBI-demo
 - GitHub repo: lee-liao/claudeRoutineExercises; work on the main branch.
 - The azure-devops MCP server is configured via the repo .mcp.json (PAT from AZURE_DEVOPS_PAT).
 
